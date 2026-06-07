@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* ─────────── Brand Design Tokens ─────────── */
+:root {
+  --color-navy: #003366;
+  --color-teal: #00BFA5;
+  --color-bg: #F5F7FA;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1A1A;
+  --color-muted: #757575;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* ─────────── Base Styles ─────────── */
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+/* ─────────── Tailwind v4 Theme Overrides ─────────── */
+@theme {
+  --color-brand-navy: #003366;
+  --color-brand-teal: #00BFA5;
+  --color-brand-bg: #F5F7FA;
+  --color-brand-surface: #FFFFFF;
+  --color-brand-text: #1A1A1A;
+  --color-brand-muted: #757575;
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+}
+
+/* ─────────── Reusable Component Classes ─────────── */
+@layer components {
+  .btn-primary {
+    @apply bg-[#003366] text-white font-semibold rounded-lg px-6 py-2.5 hover:opacity-90 transition-all duration-200 disabled:opacity-50;
+    font-family: var(--font-body);
+  }
+
+  .btn-teal {
+    @apply bg-[#00BFA5] text-white font-semibold rounded-lg px-6 py-2.5 hover:opacity-90 transition-all duration-200;
+    font-family: var(--font-body);
+  }
+
+  .btn-ghost {
+    @apply border border-gray-300 text-gray-700 font-medium rounded-lg px-4 py-2 hover:bg-gray-50 transition-all duration-200;
+    font-family: var(--font-body);
+  }
+
+  .btn-danger {
+    @apply bg-red-100 text-red-700 font-medium rounded-lg px-4 py-1.5 hover:bg-red-200 transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00BFA5] focus:border-[#00BFA5] text-sm;
+    font-family: var(--font-body);
+  }
+
+  .badge {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-open {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .badge-pending {
+    @apply bg-yellow-100 text-yellow-700;
+  }
+
+  .badge-accepted {
+    @apply bg-teal-100 text-teal-700;
+  }
+
+  .badge-rejected {
+    @apply bg-red-100 text-red-700;
+  }
+
+  .badge-closed {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  .heading-xl {
+    font-family: var(--font-heading);
+    @apply text-4xl sm:text-5xl font-extrabold;
+  }
+
+  .heading-lg {
+    font-family: var(--font-heading);
+    @apply text-2xl font-bold;
+  }
+
+  .heading-md {
+    font-family: var(--font-heading);
+    @apply text-lg font-semibold;
+  }
+}
