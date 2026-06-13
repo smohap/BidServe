@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
+  const isConsumer = hasRole('consumer');
+  const isProvider = hasRole('provider');
 
   return (
     <div className="flex flex-col items-center text-center py-16">
@@ -25,12 +27,12 @@ export default function Home() {
             </Link>
           </>
         )}
-        {user?.role === 'consumer' && (
+        {isConsumer && (
           <Link to="/consumer/requests/new" className="bg-[#003366] text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition font-inter">
             Request a Service
           </Link>
         )}
-        {user?.role === 'provider' && (
+        {isProvider && (
           <Link to="/provider/browse" className="bg-[#003366] text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition font-inter">
             Browse Requests
           </Link>

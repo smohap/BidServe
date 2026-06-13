@@ -2,13 +2,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  const isConsumer = hasRole('consumer');
+  const isProvider = hasRole('provider');
 
   return (
     <nav className="bg-[#003366] sticky top-0 z-50">
@@ -20,14 +23,26 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {user ? (
               <>
-                {user.role === 'consumer' && (
+                {isConsumer && (
                   <Link to="/consumer/requests/new" className="text-sm font-semibold text-[#00BFA5] hover:text-white transition-colors">
                     + Request
                   </Link>
                 )}
-                <Link to={user.role === 'provider' ? '/provider/browse' : '/consumer/requests'} className="text-sm text-white/80 hover:text-white transition-colors">
-                  Dashboard
-                </Link>
+                {isConsumer && (
+                  <Link to="/consumer/requests" className="text-sm text-white/80 hover:text-white transition-colors">
+                    My Requests
+                  </Link>
+                )}
+                {isProvider && (
+                  <Link to="/provider/browse" className="text-sm text-white/80 hover:text-white transition-colors">
+                    Browse
+                  </Link>
+                )}
+                {isProvider && (
+                  <Link to="/provider/offers" className="text-sm text-white/80 hover:text-white transition-colors">
+                    My Offers
+                  </Link>
+                )}
                 <Link to="/chat" className="text-sm text-white/80 hover:text-white transition-colors">
                   Messages
                 </Link>

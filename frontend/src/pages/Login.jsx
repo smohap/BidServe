@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { useToast } from '../components/Toast';
+import SocialLogin from '../components/SocialLogin';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [validation, setValidation] = useState({});
-  const { login } = useAuth();
+  const { login, hasRole } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -19,6 +20,16 @@ export default function Login() {
     else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Invalid email format';
     if (!password) errs.password = 'Password is required';
     return errs;
+  };
+
+  const getRedirectPath = (user) => {
+    const roles = user.roles || [user.role].filter(Boolean);
+    const isProvider = roles.includes('provider');
+    const isConsumer = roles.includes('consumer');
+    if (isProvider && !isConsumer) return '/provider/browse';
+    if (isConsumer && !isProvider) return '/consumer/requests';
+    // Both roles — show consumer dashboard by default (navbar shows both)
+    return '/';
   };
 
   const handleSubmit = async (e) => {
@@ -32,7 +43,7 @@ export default function Login() {
     try {
       const user = await login(email, password);
       toast.success('Signed in successfully!');
-      navigate(user.role === 'provider' ? '/provider/browse' : '/consumer/requests');
+      navigate(getRedirectPath(user));
     } catch (err) {
       setError(err.message);
       toast.error(err.message);
@@ -66,6 +77,7 @@ export default function Login() {
           Don't have an account? <Link to="/register" className="text-[#00BFA5] hover:underline font-semibold">Register</Link>
         </p>
       </form>
+      <SocialLogin />
     </div>
   );
 }

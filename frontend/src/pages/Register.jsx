@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import { useToast } from '../components/Toast';
+import SocialLogin from '../components/SocialLogin';
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('consumer');
+  const [roles, setRoles] = useState(['consumer']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [validation, setValidation] = useState({});
@@ -22,7 +23,20 @@ export default function Register() {
     else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Invalid email format';
     if (!password) errs.password = 'Password is required';
     else if (password.length < 6) errs.password = 'Password must be at least 6 characters';
+    if (roles.length === 0) errs.roles = 'Select at least one role';
     return errs;
+  };
+
+  const toggleRole = (role) => {
+    setRoles((prev) => {
+      if (prev.includes(role)) {
+        // Don't allow removing the last role
+        if (prev.length === 1) return prev;
+        return prev.filter((r) => r !== role);
+      }
+      return [...prev, role];
+    });
+    setValidation((v) => ({ ...v, roles: undefined }));
   };
 
   const handleSubmit = async (e) => {
@@ -34,9 +48,13 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      const user = await register({ name, email, password, role });
+      const user = await register({ name, email, password, roles });
       toast.success('Account created successfully!');
-      navigate(user.role === 'provider' ? '/provider/browse' : '/consumer/requests');
+      if (user.roles?.includes('provider') && !user.roles?.includes('consumer')) {
+        navigate('/provider/browse');
+      } else {
+        navigate('/consumer/requests');
+      }
     } catch (err) {
       setError(err.message);
       toast.error(err.message);
@@ -69,19 +87,20 @@ export default function Register() {
           {validation.password && <p className="text-xs text-red-500 mt-1 font-inter">{validation.password}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-[#757575] mb-2 font-inter">I am a...</label>
+          <label className="block text-sm font-medium text-[#757575] mb-2 font-inter">I want to...</label>
           <div className="flex gap-4">
-            <label className={`flex-1 border rounded-lg p-3 text-center cursor-pointer transition font-inter ${role === 'consumer' ? 'border-[#003366] bg-navy-50' : 'border-gray-300 hover:border-gray-400'}`}>
-              <input type="radio" name="role" value="consumer" checked={role === 'consumer'} onChange={() => setRole('consumer')} className="sr-only" />
+            <label className={`flex-1 border rounded-lg p-3 text-center cursor-pointer transition font-inter ${roles.includes('consumer') ? 'border-[#003366] bg-navy-50 ring-2 ring-[#00BFA5]/30' : 'border-gray-300 hover:border-gray-400'}`}>
+              <input type="checkbox" checked={roles.includes('consumer')} onChange={() => toggleRole('consumer')} className="sr-only" />
               <span className="text-sm font-semibold text-[#1A1A1A]">Client</span>
-              <p className="text-xs text-[#757575] mt-1">I need services</p>
+              <p className="text-xs text-[#757575] mt-1">Request services</p>
             </label>
-            <label className={`flex-1 border rounded-lg p-3 text-center cursor-pointer transition font-inter ${role === 'provider' ? 'border-[#003366] bg-navy-50' : 'border-gray-300 hover:border-gray-400'}`}>
-              <input type="radio" name="role" value="provider" checked={role === 'provider'} onChange={() => setRole('provider')} className="sr-only" />
+            <label className={`flex-1 border rounded-lg p-3 text-center cursor-pointer transition font-inter ${roles.includes('provider') ? 'border-[#003366] bg-navy-50 ring-2 ring-[#00BFA5]/30' : 'border-gray-300 hover:border-gray-400'}`}>
+              <input type="checkbox" checked={roles.includes('provider')} onChange={() => toggleRole('provider')} className="sr-only" />
               <span className="text-sm font-semibold text-[#1A1A1A]">Provider</span>
-              <p className="text-xs text-[#757575] mt-1">I offer services</p>
+              <p className="text-xs text-[#757575] mt-1">Offer services</p>
             </label>
           </div>
+          {validation.roles && <p className="text-xs text-red-500 mt-1 font-inter">{validation.roles}</p>}
         </div>
         <button type="submit" disabled={loading}
           className="btn-primary w-full">
@@ -91,6 +110,7 @@ export default function Register() {
           Already have an account? <Link to="/login" className="text-[#00BFA5] hover:underline font-semibold">Sign In</Link>
         </p>
       </form>
+      <SocialLogin />
     </div>
   );
 }

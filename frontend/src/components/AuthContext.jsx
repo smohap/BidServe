@@ -3,10 +3,20 @@ import { api } from '../api/client';
 
 const AuthContext = createContext(null);
 
+// Normalize user object: always produce a `roles` array (backwards compatible with `role`)
+function normalizeUser(user) {
+  if (!user) return null;
+  if (user.roles) return user;
+  if (user.role) {
+    return { ...user, roles: [user.role] };
+  }
+  return user;
+}
+
 function getUserFromStorage() {
   try {
     const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
+    return stored ? normalizeUser(JSON.parse(stored)) : null;
   } catch {
     return null;
   }
@@ -16,20 +26,22 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => getUserFromStorage());
   const [loading, setLoading] = useState(false);
 
+  const handleAuthResponse = (data) => {
+    const normalized = normalizeUser(data.user);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(normalized));
+    setUser(normalized);
+    return normalized;
+  };
+
   const login = async (email, password) => {
     const data = await api.login(email, password);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    setUser(data.user);
-    return data.user;
+    return handleAuthResponse(data);
   };
 
   const register = async (userData) => {
     const data = await api.register(userData);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    setUser(data.user);
-    return data.user;
+    return handleAuthResponse(data);
   };
 
   const logout = () => {
@@ -38,8 +50,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Helper: check if user has a specific role
+  const hasRole = (roleName) => {
+    return user?.roles?.includes(roleName) ?? user?.role === roleName ?? false;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );
